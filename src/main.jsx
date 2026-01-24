@@ -6,7 +6,7 @@
 
 	ReactDOM.createRoot(document.getElementById('root')).render(
  		 <React.StrictMode>
- 		   <BrowserRouter>
+ 		   <BrowserRouter basename="/R-task5">
  		     <App />
 		    </BrowserRouter>
 		  </React.StrictMode>,
