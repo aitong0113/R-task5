@@ -5,6 +5,8 @@ import Products from '../pages/Products';
 import ProductDetail from '../pages/ProductDetail';
 import Cart from '../pages/Cart';
 import Checkout from '../pages/Checkout';
+import NotFound from '../pages/NotFound';
+import OrderSuccess from '../pages/OrderSuccess';
 
 const routes = [
   {
@@ -12,7 +14,7 @@ const routes = [
     element: <Layout />,
     children: [
       { 
-        path: '/', 
+        index: true, 
         element: <Home /> 
       },
       { 
@@ -30,6 +32,14 @@ const routes = [
       { 
         path: '/checkout', 
         element: <Checkout /> 
+      },
+      { 
+        path: '/order-success/:id', 
+        element: <OrderSuccess /> 
+      },
+      { 
+        path: '*', 
+        element: <NotFound /> 
       },
     ],
   },

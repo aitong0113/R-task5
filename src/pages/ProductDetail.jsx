@@ -1,39 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-
-const API_BASE = import.meta.env.VITE_API_BASE;
-const PATH = import.meta.env.VITE_API_PATH;
-
-// 加入購物車
-const addToCart = (productId) => {
-  fetch(`${API_BASE}/api/${PATH}/cart`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      data: {
-        product_id: productId,
-        qty: 1,
-      },
-    }),
-  })
-    .then(res => res.json())
-    .then(() => {
-      alert('已加入購物車');
-    });
-};
+import { getProduct, addToCart } from '../services/api';
 
 export default function ProductDetail() {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
 
   useEffect(() => {
-    fetch(`${API_BASE}/api/${PATH}/product/${id}`)
-      .then(res => res.json())
-      .then(data => {
-        setProduct(data.product);
-      });
+    getProduct(id).then(data => {
+      setProduct(data.product);
+    });
   }, [id]);
 
   if (!product) {
@@ -104,7 +80,7 @@ export default function ProductDetail() {
 
             <button
               className="btn btn-primary btn-lg w-100"
-              onClick={() => addToCart(product.id)}
+              onClick={() => addToCart(product.id, 1).then(() => alert('已加入購物車'))}
             >
               加入購物車
             </button>

@@ -1,39 +1,51 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-
-const API_BASE = import.meta.env.VITE_API_BASE;
-const PATH = import.meta.env.VITE_API_PATH;
-
-const addToCart = (productId) => {
-  fetch(`${API_BASE}/api/${PATH}/cart`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      data: {
-        product_id: productId,
-        qty: 1,
-      },
-    }),
-  })
-    .then(res => res.json())
-    .then(() => {
-      alert('已加入購物車');
-    });
-};
+import { getProducts, addToCart } from '../services/api';
+import Pagination from '../components/Pagination';
 
 
 export default function Products() {
+  const PER_PAGE = 9;
+  const [allProducts, setAllProducts] = useState([]);
   const [products, setProducts] = useState([]);
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({ current_page: 1, total_pages: 1 });
+
+  const slicePage = (list, p) => {
+    const totalPages = Math.max(1, Math.ceil(list.length / PER_PAGE));
+    const start = (p - 1) * PER_PAGE;
+    const end = start + PER_PAGE;
+    setProducts(list.slice(start, end));
+    setPagination({ current_page: p, total_pages: totalPages });
+  };
 
   useEffect(() => {
-    fetch(`${API_BASE}/api/${PATH}/products`)
-      .then(res => res.json())
-      .then(data => {
-        setProducts(data.products);
-      });
+    // 首次載入：抓取所有後端頁次合併，再以前端每頁 9 筆顯示
+    const loadAll = async () => {
+      const first = await getProducts(1);
+      const firstList = first.products || [];
+      const totalServerPages = first.pagination?.total_pages || 1;
+
+      if (totalServerPages > 1) {
+        const tasks = Array.from({ length: totalServerPages - 1 }, (_, i) => getProducts(i + 2));
+        const rest = await Promise.all(tasks);
+        const restList = rest.flatMap(r => r.products || []);
+        const all = [...firstList, ...restList];
+        setAllProducts(all);
+        slicePage(all, 1);
+      } else {
+        setAllProducts(firstList);
+        slicePage(firstList, 1);
+      }
+    };
+    loadAll();
   }, []);
+
+  useEffect(() => {
+    if (allProducts.length > 0) {
+      slicePage(allProducts, page);
+    }
+  }, [page, allProducts]);
 
   return (
     <div className="container py-4">
@@ -94,7 +106,7 @@ export default function Products() {
                 
                 <button
                   className="btn btn-outline-primary w-100"
-                  onClick={() => addToCart(product.id)}
+                  onClick={() => addToCart(product.id, 1).then(() => alert('已加入購物車'))}
                 >
                   加入購物車
                 </button>
@@ -109,6 +121,14 @@ export default function Products() {
             </div>
           </div>
         ))}
+      </div>
+
+      <div className="mt-4">
+        <Pagination
+          currentPage={pagination.current_page || page}
+          totalPages={pagination.total_pages || 1}
+          onPageChange={(p) => setPage(p)}
+        />
       </div>
     </div>
   );

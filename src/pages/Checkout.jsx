@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-
-const API_BASE = import.meta.env.VITE_API_BASE;
-const PATH = import.meta.env.VITE_API_PATH;
+import { submitOrder } from '../services/api';
 
 export default function Checkout() {
   const navigate = useNavigate();
@@ -23,32 +21,32 @@ export default function Checkout() {
     });
   };
 
-  const submitOrder = () => {
-    fetch(`${API_BASE}/api/${PATH}/order`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+  const submit = () => {
+    submitOrder({
+      user: {
+        name: form.name,
+        email: form.email,
+        tel: form.tel,
+        address: form.address,
       },
-      body: JSON.stringify({
-        data: {
-          user: {
-            name: form.name,
-            email: form.email,
-            tel: form.tel,
-            address: form.address,
-          },
-          message: form.message,
-        },
-      }),
+      message: form.message,
     })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          alert('訂單建立成功！');
-          navigate('/'); // 成功後回首頁（或你想導去哪）
+      .then((data) => {
+        if (data?.success) {
+          const orderId = data.orderId || data.order?.id || data.data?.orderId;
+          if (orderId) {
+            navigate(`/order-success/${orderId}`);
+          } else {
+            alert('訂單建立成功！但未取得訂單編號');
+            navigate('/');
+          }
         } else {
-          alert('訂單建立失敗，請確認資料');
+          alert(data?.message || '訂單建立失敗，請確認資料');
         }
+      })
+      .catch((err) => {
+        const msg = err?.response?.data?.message || err.message || '送出訂單時發生錯誤';
+        alert(msg);
       });
   };
 
@@ -123,7 +121,7 @@ export default function Checkout() {
         </Link>
         <button
           className="btn btn-primary"
-          onClick={submitOrder}
+          onClick={submit}
         >
           送出訂單
         </button>
