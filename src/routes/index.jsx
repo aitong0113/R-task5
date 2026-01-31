@@ -12,6 +12,8 @@ const routes = [
   {
     path: '/',
     element: <Layout />,
+    // 當路由或 loader 出錯時，使用自訂錯誤頁取代預設訊息
+    errorElement: <NotFound />,
     children: [
       { 
         index: true, 

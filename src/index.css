@@ -8,3 +8,34 @@ body {
 header {
   margin-bottom: 24px;
 }
+
+/* --- 404 Not Found styles --- */
+.nf-wrap {
+  min-height: 60vh;
+}
+
+.nf-hero {
+  font-weight: 800;
+  font-size: clamp(56px, 12vw, 160px);
+  letter-spacing: 0.06em;
+  background: linear-gradient(135deg, #0d6efd 0%, #6f42c1 45%, #20c997 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 8px 24px rgba(13, 110, 253, 0.18));
+  animation: nf-float 6s ease-in-out infinite;
+}
+
+@keyframes nf-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.nf-wrap .btn {
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+
+.nf-wrap .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 .25rem .75rem rgba(0,0,0,.08);
+}
